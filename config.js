@@ -11,7 +11,7 @@ module.exports = {
   password: 'Espsoft123#',
   database: "quant_fund",
   mysqlPort: 3306,
-  JWT_SECRET_KEY: 'ly27lg35kci85tvgvl0zgbod4',
+  JWT_SECRET_KEY: process.env.JWT_SECRET_KEY || 'ly27lg35kci85tvgvl0zgbod4',
   SESSION_EXPIRES_IN: '24h',
   imageUrl: '',
   contractAddress: '0x98Ff86eD5B0dDd3C85115845A90A6066C25bedf9',
@@ -19,4 +19,5 @@ module.exports = {
   clientDepositAddress: '0xEfcd2e9ca6483147A25a106C654a6E557eb8f916',
   bscRpcUrl: 'https://bsc-dataseed.bnbchain.org',
   INITIAL_CHIPS_AMOUNT: process.env.INITIAL_CHIPS_AMOUNT || 10000,
+  MONGO_URI: process.env.MONGO_URI,
 }

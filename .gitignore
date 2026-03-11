@@ -4,6 +4,9 @@
 /server/dist
 /server/build
 /server/public
-/server/src
+# TODO: this one does not make sense to be untracked unless the src is not public what may not be transparent
+# /server/src 
 /server/test
-/server/test
+/client/build
+.env
+.DS_Store

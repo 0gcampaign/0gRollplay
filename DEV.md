@@ -1,0 +1,1 @@
+To skip the loading for dev: http://localhost:3000/connect?walletAddress=0x71C&gameId=1&username=YOUR_USERNAME

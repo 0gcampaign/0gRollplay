@@ -14,14 +14,13 @@ const ConnectWallet = () => {
 
   const { socket } = useContext(socketContext)
   const navigate = useNavigate()
-  const useQuery = () => new URLSearchParams(useLocation().search);
-  let query = useQuery()
+  const query = new URLSearchParams(useLocation().search);
+  const walletAddress = query.get('walletAddress')
+  const gameId = query.get('gameId')
+  const username = query.get('username')
 
   useEffect(() => {
     if (socket !== null && socket.connected === true) {
-      const walletAddress = query.get('walletAddress')
-      const gameId = query.get('gameId')
-      const username = query.get('username')
       if (walletAddress && gameId && username) {
         console.log(username)
         setWalletAddress(walletAddress)
@@ -30,7 +29,17 @@ const ConnectWallet = () => {
         navigate('/play')
       }
     }
-  }, [socket])
+  }, [socket, walletAddress, gameId, username, setWalletAddress, navigate])
+
+  if (!walletAddress || !gameId || !username) {
+    return (
+      <div className="connect-wallet-error">
+        <h1>Missing Connection Parameters</h1>
+        <p>Please provide walletAddress, gameId, and username in the URL.</p>
+        <button onClick={() => navigate('/')}>Back to Landing</button>
+      </div>
+    );
+  }
 
   return (
     <>

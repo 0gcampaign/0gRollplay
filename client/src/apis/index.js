@@ -1,15 +1,13 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import config from '../clientConfig';
+
 
 export const useApi = () => {
   const getUserProfile = async (address) => {
     try {
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/get_profile`, {
+      const { data } = await axios.post(`${config.serverURI}/get_profile`, {
         address: address
-      }, {
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        }
       });
       if (data.success) {
         console.log('success', data)
@@ -26,12 +24,8 @@ export const useApi = () => {
 
   const getPokerTables = async (gameId) => {
     try {
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/get_poker_tables`, {
+      const { data } = await axios.post(`${config.serverURI}/get_poker_tables`, {
         gameId: gameId
-      }, {
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        }
       });
       if (data.success) {
         return data.result
@@ -47,12 +41,8 @@ export const useApi = () => {
 
   const getGameById = async (gameId) => {
     try {
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/get_game_by_id`, {
+      const { data } = await axios.post(`${config.serverURI}/get_game_by_id`, {
         gameId: gameId
-      }, {
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        }
       });
       if (data.success) {
         return data.result
